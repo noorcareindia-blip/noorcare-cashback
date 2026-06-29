@@ -95,36 +95,44 @@ Claim Cashback
 </div>
 
 <script>
+async function claim() {
 
-function claim(){
+  const code = document.getElementById("code").value.trim();
 
-let rewards=[20,20,20,20,20,30,30,30,40,50];
+  if(code==""){
+    alert("Please enter cashback code");
+    return;
+  }
 
-let amount=rewards[Math.floor(Math.random()*rewards.length)];
+  const result = document.getElementById("result");
+  result.innerHTML = "Checking code...";
 
-document.getElementById("result").innerHTML=
-"🎉 Congratulations!<br><br>You Won ₹"+amount+
-"<br><br>Send this screenshot on WhatsApp to receive cashback.";
+  try{
 
-  const code=document.getElementById("code").value.trim();
+    const response = await fetch("https://script.google.com/macros/s/AKfycbwR4y8gOik8OsVy4F-0Qvd_hDX7IWqfqo9pZz2bOKuEYbDbQdF7HF0zdPKhbFNez0wF/exec",{
+      method:"POST",
+      headers:{
+        "Content-Type":"text/plain;charset=utf-8"
+      },
+      body:new URLSearchParams({
+        code:code
+      })
+    });
 
-if(code==""){
-alert("Please enter cashback code");
-return;
+    const text = await response.text();
+
+    if(text=="INVALID_CODE"){
+      result.innerHTML="❌ Invalid Cashback Code";
+    }
+    else if(text=="ALREADY_USED"){
+      result.innerHTML="❌ Cashback Code Already Used";
+    }
+    else{
+      result.innerHTML="🎉 Congratulations! You won ₹"+text+"<br><br>📸 Send this screenshot on WhatsApp to receive cashback.";
+    }
+
+  }catch(e){
+    result.innerHTML="⚠️ Server Error";
+  }
+
 }
-
-if(localStorage.getItem(code)){
-document.getElementById("result").innerHTML=
-"❌ This cashback code has already been claimed on this device.";
-return;
-}
-
-localStorage.setItem(code,amount);
-
-}
-}
-</script>
-</body>
-</html>
-
-</html>
